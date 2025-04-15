@@ -11,10 +11,14 @@
 
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { createServer } from "./mcp-proxy.js";
+import { loadConfig } from "./config.js";
+import { createClients } from "./client.js";
 
 async function main() {
   const transport = new StdioServerTransport();
-  const { server, cleanup } = await createServer();
+  const config = await loadConfig();
+  const clients = await createClients(config.servers);
+  const { server, cleanup } = await createServer(clients);
 
   await server.connect(transport);
 
@@ -22,6 +26,8 @@ async function main() {
   process.on("SIGINT", async () => {
     await cleanup();
     await server.close();
+
+    await Promise.all(clients.map(({cleanup}) => cleanup()));
     process.exit(0);
   });
 }

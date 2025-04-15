@@ -24,10 +24,10 @@ import * as eventsource from 'eventsource';
 
 global.EventSource = eventsource.EventSource
 
-export const createServer = async () => {
+export const createServer = async (clients) => {
   // Load configuration and connect to servers
   const config = await loadConfig();
-  const connectedClients = await createClients(config.servers);
+  const connectedClients = clients;
   console.log(`Connected to ${connectedClients.length} servers`);
 
   // Maps to track which client owns which resource
@@ -296,7 +296,6 @@ export const createServer = async () => {
   });
 
   const cleanup = async () => {
-    await Promise.all(connectedClients.map(({ cleanup }) => cleanup()));
   };
 
   return { server, cleanup };
