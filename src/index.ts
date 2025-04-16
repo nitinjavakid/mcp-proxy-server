@@ -20,19 +20,21 @@ async function main() {
   const clients = await createClients(config.servers);
   const { server, cleanup } = await createServer(clients);
 
-  await server.connect(transport);
+  const gracefulShutdown = async (signal) => {
+    await transport.close();
+    await server.close();
+    await cleanup();
+    await Promise.all(clients.map(({cleanup}) => cleanup()));
+  };
 
   // Cleanup on exit
-  process.on("SIGINT", async () => {
-    await cleanup();
-    await server.close();
+  process.on("SIGINT", gracefulShutdown);
+  process.on("SIGTERM", gracefulShutdown);
 
-    await Promise.all(clients.map(({cleanup}) => cleanup()));
-    process.exit(0);
-  });
+  await server.connect(transport);
 }
 
 main().catch((error) => {
   console.error("Server error:", error);
   process.exit(1);
-});
+})
