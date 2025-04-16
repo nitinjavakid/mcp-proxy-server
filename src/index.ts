@@ -9,32 +9,29 @@
  * - Summarizing all notes via a prompt
  */
 
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { createServer } from "./mcp-proxy.js";
 import { loadConfig } from "./config.js";
 import { createClients } from "./client.js";
+import { command, run, flag } from "cmd-ts";
+import { handleStdioTransport } from "./stdio.js";
+import { handleSSETransport } from "./sse.js";
 
-async function main() {
-  const transport = new StdioServerTransport();
-  const config = await loadConfig();
-  const clients = await createClients(config.servers);
-  const { server, cleanup } = await createServer(clients);
+const app = command({
+  name: 'mcp-proxy-server',
+  args: {
+    sse: flag({ long: 'sse', description: 'If specified the proxy will run in SSE mode' })
+  },
+  handler: async ({sse}) => {
+    const config = await loadConfig();
+    const clients = await createClients(config.servers);
 
-  const gracefulShutdown = async (signal) => {
-    await transport.close();
-    await server.close();
-    await cleanup();
-    await Promise.all(clients.map(({cleanup}) => cleanup()));
-  };
+    if (sse) {
+      await handleSSETransport(clients);
+    } else {
+      await handleStdioTransport(clients);
+    }
+  },
+});
 
-  // Cleanup on exit
-  process.on("SIGINT", gracefulShutdown);
-  process.on("SIGTERM", gracefulShutdown);
+run(app, process.argv.slice(2));
 
-  await server.connect(transport);
-}
 
-main().catch((error) => {
-  console.error("Server error:", error);
-  process.exit(1);
-})

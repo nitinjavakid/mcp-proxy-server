@@ -106,14 +106,11 @@ On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
       "command": "/path/to/mcp-proxy-server/build/index.js",
       "env": {
         "MCP_CONFIG_PATH": "/absolute/path/to/your/config.json",
-        "KEEP_SERVER_OPEN": "1"
       }
     }
   }
 }
 ```
-
-- `KEEP_SERVER_OPEN` will keep the SSE running even if a client disconnects. Useful when multiple clients connects to the MCP proxy.
 
 ### Debugging
 
