@@ -1,3 +1,5 @@
+[![Create and publish a Docker image](https://github.com/nitinjavakid/mcp-proxy-server/actions/workflows/docker-images.yml/badge.svg?branch=main)](https://github.com/nitinjavakid/mcp-proxy-server/actions/workflows/docker-images.yml)
+
 # MCP Proxy Server
 
 An MCP proxy server that aggregates and serves multiple MCP resource servers through a single interface. This server acts as a central hub that can:
