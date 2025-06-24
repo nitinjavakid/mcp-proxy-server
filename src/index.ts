@@ -9,24 +9,29 @@
  * - Summarizing all notes via a prompt
  */
 
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { createServer } from "./mcp-proxy.js";
+import { loadConfig } from "./config.js";
+import { createClients } from "./client.js";
+import { command, run, flag } from "cmd-ts";
+import { handleStdioTransport } from "./stdio.js";
+import { handleSSETransport } from "./sse.js";
 
-async function main() {
-  const transport = new StdioServerTransport();
-  const { server, cleanup } = await createServer();
+const app = command({
+  name: 'mcp-proxy-server',
+  args: {
+    sse: flag({ long: 'sse', description: 'If specified the proxy will run in SSE mode' })
+  },
+  handler: async ({sse}) => {
+    const config = await loadConfig();
+    const clients = await createClients(config.servers);
 
-  await server.connect(transport);
-
-  // Cleanup on exit
-  process.on("SIGINT", async () => {
-    await cleanup();
-    await server.close();
-    process.exit(0);
-  });
-}
-
-main().catch((error) => {
-  console.error("Server error:", error);
-  process.exit(1);
+    if (sse) {
+      await handleSSETransport(clients);
+    } else {
+      await handleStdioTransport(clients);
+    }
+  },
 });
+
+run(app, process.argv.slice(2));
+
+

@@ -26,7 +26,7 @@ export interface Config {
 
 export const loadConfig = async (): Promise<Config> => {
   try {
-    const configPath = resolve(process.cwd(), 'config.json');
+    const configPath = process.env.MCP_CONFIG_PATH || resolve(process.cwd(), 'config.json');
     const fileContents = await readFile(configPath, 'utf-8');
     return JSON.parse(fileContents);
   } catch (error) {

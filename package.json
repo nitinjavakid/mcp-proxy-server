@@ -21,8 +21,9 @@
     "inspector": "npx @modelcontextprotocol/inspector build/index.js"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "0.6.0",
+    "@modelcontextprotocol/sdk": "1.9.0",
     "@types/cors": "^2.8.17",
+    "cmd-ts": "^0.13.0",
     "cors": "^2.8.5",
     "eventsource": "^3.0.2",
     "express": "^4.21.1",
